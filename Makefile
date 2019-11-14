@@ -11,4 +11,4 @@ fileStat.o: fileStat.c
 	$(CC) -c fileStat.c
 
 run:
-	./fileStat
+	./fileStat fileStat.c

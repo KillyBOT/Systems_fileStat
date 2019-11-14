@@ -8,9 +8,26 @@
 #include <time.h>
 
 void getFileStats(char* fileName, struct stat* s){
+
+  char buffer[64];
+  sprintf(buffer, "%ldB, %ldKB, %ldMB, %ldGB",s->st_size,s->st_size / 1024, s->st_size / 1046576, s->st_size / 1073741824);
+  int temp = 0b100000000;
+
   printf("File stats for file [%s]:\n",fileName);
-  printf("File size: %ld bytes\n",s->st_size);
-  printf("File permissions: %o\n",s->st_mode);
+  printf("File size: %s\n",buffer);
+  printf("File permissions: -");
+  for(int x = 0; x < 9; x++){
+    if((temp & s->st_mode) != 0){
+      if((x % 3) == 0) printf("r");
+      if((x % 3) == 1) printf("w");
+      if((x % 3) == 2) printf("x");
+    }else{
+      printf("-");
+    }
+
+    temp >>= 1;
+  }
+  printf("\n");
   printf("User ID: %d | Group ID: %d\n",s->st_uid,s->st_gid);
   printf("Last time of access: %s",ctime(&(s->st_atime)));
   printf("Last time of modification: %s",ctime(&(s->st_mtime)));
@@ -18,21 +35,16 @@ void getFileStats(char* fileName, struct stat* s){
 }
 
 int main(int argc, char* argv[]){
-  int testFile = open("testFile", O_CREAT | O_RDWR | O_TRUNC, 0644);
   struct stat* fileStats = malloc(sizeof(struct stat));
-  char* toWrite = "Hello there hehe";
 
-  if(stat("testFile",fileStats) < 0){
+  if(stat(argv[1],fileStats) < 0){
     printf("Error getting stats on file\n");
     printf("%d: %s\n",errno, strerror(errno));
   }
 
-  getFileStats("testFile",fileStats);
-
-  write(testFile, toWrite, 17);
+  getFileStats(argv[1],fileStats);
 
   free(fileStats);
-  close(testFile);
 
   return 0;
 }
